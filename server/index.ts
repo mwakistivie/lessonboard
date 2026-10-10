@@ -3,6 +3,10 @@ import { pathToFileURL } from "url";
 import { registerRoutes } from "./routes.ts";
 import { setupVite, serveStatic, log } from "./vite.ts";
 
+if (!process.env.NODE_ENV) {
+  process.env.NODE_ENV = process.env.VERCEL ? "production" : "development";
+}
+
 export async function createApp() {
   const app = express();
   app.use(express.json());
@@ -48,7 +52,9 @@ export async function createApp() {
     throw err;
   });
 
-  if (app.get("env") === "development") {
+  const isDevelopment = process.env.NODE_ENV === "development";
+
+  if (isDevelopment) {
     await setupVite(app, server);
   } else {
     serveStatic(app);
