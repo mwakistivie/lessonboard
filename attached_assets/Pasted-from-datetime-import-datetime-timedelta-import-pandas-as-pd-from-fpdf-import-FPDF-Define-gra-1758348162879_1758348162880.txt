@@ -1,0 +1,82 @@
+from datetime import datetime, timedelta
+import pandas as pd
+from fpdf import FPDF
+
+# Define grades
+grades = [
+    "PP1", "PP2", "PG", "1W", "1C", "2C", "2W", "3W", "3C",
+    "4W", "4C", "5W", "5C", "6C", "6W", "7W", "7C", "8W", "8C", "9W", "9C"
+]
+
+# Time setup
+start_time = datetime.strptime("08:00", "%H:%M")
+end_time = datetime.strptime("15:20", "%H:%M")
+lesson_duration = timedelta(minutes=40)
+
+# Break durations
+first_break = timedelta(minutes=10)
+second_break = timedelta(minutes=20)
+lunch_break = timedelta(minutes=40)
+
+# Generate time slots with breaks
+current_time = start_time
+slots = []
+lesson_counter = 0
+breaks_inserted = 0
+
+while current_time + lesson_duration <= end_time:
+    slots.append((current_time.strftime("%H:%M"), (current_time + lesson_duration).strftime("%H:%M")))
+    current_time += lesson_duration
+    lesson_counter += 1
+
+    # Insert breaks
+    if lesson_counter == 2 and breaks_inserted == 0:
+        current_time += first_break
+        breaks_inserted += 1
+    elif lesson_counter == 4 and breaks_inserted == 1:
+        current_time += second_break
+        breaks_inserted += 1
+    elif lesson_counter == 6 and breaks_inserted == 2:
+        current_time += lunch_break
+        breaks_inserted += 1
+
+# Create timetable
+days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"]
+timetable = {day: [] for day in days}
+grade_index = 0
+
+for day in days:
+    for slot in slots:
+        timetable[day].append({
+            "Time": f"{slot[0]} - {slot[1]}",
+            "Grade": grades[grade_index % len(grades)]
+        })
+        grade_index += 1
+
+# Create PDF
+pdf = FPDF()
+pdf.set_auto_page_break(auto=True, margin=15)
+pdf.add_page()
+pdf.set_font("Arial", "B", 16)
+pdf.cell(200, 10, "Weekly ICT Timetable", ln=True, align="C")
+
+for day in days:
+    pdf.set_font("Arial", "B", 14)
+    pdf.cell(0, 10, day, ln=True)
+
+    pdf.set_font("Arial", "B", 12)
+    pdf.cell(50, 10, "Time", border=1)
+    pdf.cell(50, 10, "Grade", border=1)
+    pdf.ln()
+
+    pdf.set_font("Arial", "", 12)
+    for entry in timetable[day]:
+        pdf.cell(50, 10, entry["Time"], border=1)
+        pdf.cell(50, 10, entry["Grade"], border=1)
+        pdf.ln()
+
+    pdf.ln(5)
+
+# Save PDF
+pdf.output("ICT_Timetable.pdf")
+print("Saved as ICT_Timetable.pdf")
