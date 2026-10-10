@@ -1,4 +1,4 @@
-import { type User, type InsertUser, type TimetableLesson, type InsertLesson, type Timetable, type InsertTimetable, insertTimetableSchema, insertLessonSchema } from "@shared/schema";
+import { type User, type InsertUser, type TimetableLesson, type InsertLesson, type Timetable, type InsertTimetable, insertTimetableSchema, insertLessonSchema } from "../shared/schema.ts";
 import { randomUUID } from "crypto";
 
 // modify the interface with any CRUD methods
